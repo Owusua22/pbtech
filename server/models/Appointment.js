@@ -5,7 +5,7 @@ const appointmentSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // link to the client/user who books
-      
+        required: true,
     },
    
     title: {
