@@ -4,7 +4,7 @@ import {
   fetchImages,
   uploadNewImage,
   removeImage,
-  editImage, // ✅ Added
+  editImage,
 } from "../../Redux/Slice/imageSlice";
 
 const Media = () => {
@@ -16,43 +16,67 @@ const Media = () => {
   const [editingImage, setEditingImage] = useState(null);
   const [newName, setNewName] = useState("");
   const [newFile, setNewFile] = useState(null);
+  
+  // Upload modal states
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadName, setUploadName] = useState("");
+  const [uploadPreview, setUploadPreview] = useState(null);
 
   useEffect(() => {
     dispatch(fetchImages());
   }, [dispatch]);
 
-  // ✅ Upload handler
-  const handleUpload = async (e) => {
+  // Handle file selection for upload
+  const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setUploading(true);
-      setProgress(0);
-      await dispatch(uploadNewImage(file, setProgress));
-      setUploading(false);
-      e.target.value = "";
+      setUploadFile(file);
+      setUploadName(file.name.split('.').slice(0, -1).join('.'));
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => setUploadPreview(reader.result);
+      reader.readAsDataURL(file);
     }
   };
 
-  // ✅ Delete handler
+  // Upload handler
+  const handleUpload = async () => {
+    if (!uploadFile) return;
+    
+    setUploading(true);
+    setProgress(0);
+    await dispatch(uploadNewImage(uploadFile, setProgress));
+    setUploading(false);
+    
+    // Reset upload modal
+    setShowUploadModal(false);
+    setUploadFile(null);
+    setUploadName("");
+    setUploadPreview(null);
+  };
+
+  // Delete handler
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this image?")) {
       dispatch(removeImage(id));
     }
   };
 
-  // ✅ Start editing an image
+  // Start editing an image
   const startEditing = (img) => {
     setEditingImage(img);
     setNewName(img.name || "");
     setNewFile(null);
   };
 
-  // ✅ Handle file change when updating image
+  // Handle file change when updating image
   const handleFileChange = (e) => {
     setNewFile(e.target.files[0]);
   };
 
-  // ✅ Save updated image (rename or replace)
+  // Save updated image
   const handleUpdate = async () => {
     if (!editingImage) return;
 
@@ -64,306 +88,695 @@ const Media = () => {
       })
     );
 
-    // Reset states
     setEditingImage(null);
     setNewName("");
     setNewFile(null);
   };
 
   return (
-    <div
-      style={{
-        padding: "30px",
-        backgroundColor: "#f9fafb",
-        minHeight: "100vh",
-        fontFamily: "Inter, sans-serif",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: "24px",
-          fontWeight: "600",
-          marginBottom: "20px",
-          color: "#1f2937",
-        }}
-      >
-        📸 Media Gallery
-      </h2>
-
-      {/* Upload Button */}
-      <label
-        htmlFor="file-upload"
-        style={{
-          display: "inline-block",
-          backgroundColor: "#2563eb",
-          color: "white",
-          padding: "10px 18px",
-          borderRadius: "8px",
-          cursor: "pointer",
-          fontWeight: "500",
-          marginBottom: "20px",
-          transition: "background-color 0.3s ease",
-        }}
-        onMouseEnter={(e) => (e.target.style.backgroundColor = "#1d4ed8")}
-        onMouseLeave={(e) => (e.target.style.backgroundColor = "#2563eb")}
-      >
-        Upload Image
-      </label>
-      <input
-        id="file-upload"
-        type="file"
-        accept="image/*"
-        onChange={handleUpload}
-        style={{ display: "none" }}
-      />
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <div>
+          <h2 style={styles.title}>Media Gallery</h2>
+          <p style={styles.subtitle}>
+            {images?.length || 0} {images?.length === 1 ? 'image' : 'images'} uploaded
+          </p>
+        </div>
+        <button
+          onClick={() => setShowUploadModal(true)}
+          style={styles.uploadButton}
+          onMouseEnter={(e) => e.target.style.backgroundColor = "#1d4ed8"}
+          onMouseLeave={(e) => e.target.style.backgroundColor = "#2563eb"}
+        >
+          <span style={styles.uploadIcon}>+</span> Upload Image
+        </button>
+      </div>
 
       {/* Upload Progress Bar */}
       {uploading && (
-        <div style={{ margin: "10px 0", color: "#2563eb" }}>
-          Uploading... {progress}%
-          <div
-            style={{
-              height: "6px",
-              background: "#e5e7eb",
-              borderRadius: "4px",
-              overflow: "hidden",
-              marginTop: "5px",
-            }}
-          >
-            <div
-              style={{
-                width: `${progress}%`,
-                height: "100%",
-                backgroundColor: "#2563eb",
-                transition: "width 0.3s ease",
-              }}
-            />
+        <div style={styles.progressContainer}>
+          <div style={styles.progressHeader}>
+            <span>Uploading...</span>
+            <span style={styles.progressText}>{progress}%</span>
+          </div>
+          <div style={styles.progressBar}>
+            <div style={{...styles.progressFill, width: `${progress}%`}} />
           </div>
         </div>
       )}
 
       {/* Image Grid */}
       {loading ? (
-        <p>Loading images...</p>
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner} />
+          <p style={styles.loadingText}>Loading images...</p>
+        </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-            gap: "20px",
-          }}
-        >
+        <div style={styles.grid}>
           {images && images.length > 0 ? (
             images.map((img) => (
-              <div
-                key={img._id}
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: "12px",
-                  boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
-                  padding: "10px",
-                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "scale(1.03)";
-                  e.currentTarget.style.boxShadow =
-                    "0 6px 12px rgba(0,0,0,0.1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "scale(1)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 8px rgba(0,0,0,0.05)";
-                }}
-              >
-                <img
-                  src={img.imageUrl}
-                  alt={img.name || "Uploaded"}
-                  style={{
-                    width: "100%",
-                    height: "140px",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => setPreview(img.imageUrl)}
-                  onError={(e) =>
-                    (e.target.src =
-                      "https://via.placeholder.com/150?text=No+Image")
-                  }
-                />
-                <p
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    marginTop: "10px",
-                    color: "#374151",
-                    textAlign: "center",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {img.name || "Untitled"}
-                </p>
-
-                {/* Update & Delete buttons */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "6px",
-                    marginTop: "8px",
-                  }}
-                >
-                  <button
-                    onClick={() => startEditing(img)}
-                    style={{
-                      backgroundColor: "#10b981",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      padding: "6px 10px",
-                      cursor: "pointer",
-                      width: "50%",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(img._id)}
-                    style={{
-                      backgroundColor: "#ef4444",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      padding: "6px 10px",
-                      cursor: "pointer",
-                      width: "50%",
-                      fontSize: "13px",
-                      fontWeight: "500",
-                    }}
-                  >
-                    Delete
-                  </button>
+              <div key={img._id} style={styles.card}>
+                <div style={styles.imageWrapper}>
+                  <img
+                    src={img.imageUrl}
+                    alt={img.name || "Uploaded"}
+                    style={styles.image}
+                    onClick={() => setPreview(img.imageUrl)}
+                    onError={(e) =>
+                      (e.target.src =
+                        "https://via.placeholder.com/300x200?text=Image+Not+Found")
+                    }
+                  />
+                  <div style={styles.imageOverlay}>
+                    <button
+                      onClick={() => setPreview(img.imageUrl)}
+                      style={styles.viewButton}
+                    >
+                      👁️ View
+                    </button>
+                  </div>
+                </div>
+                
+                <div style={styles.cardContent}>
+                  <p style={styles.imageName}>
+                    {img.name || "Untitled"}
+                  </p>
+                  
+                  <div style={styles.buttonGroup}>
+                    <button
+                      onClick={() => startEditing(img)}
+                      style={{...styles.actionButton, ...styles.editButton}}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = "#059669"}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = "#10b981"}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(img._id)}
+                      style={{...styles.actionButton, ...styles.deleteButton}}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = "#dc2626"}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = "#ef4444"}
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
           ) : (
-            <p style={{ gridColumn: "1 / -1", textAlign: "center" }}>
-              No images uploaded yet.
-            </p>
+            <div style={styles.emptyState}>
+              <div style={styles.emptyIcon}>📸</div>
+              <h3 style={styles.emptyTitle}>No images yet</h3>
+              <p style={styles.emptyText}>Upload your first image to get started</p>
+              <button
+                onClick={() => setShowUploadModal(true)}
+                style={styles.emptyButton}
+                onMouseEnter={(e) => e.target.style.backgroundColor = "#1d4ed8"}
+                onMouseLeave={(e) => e.target.style.backgroundColor = "#2563eb"}
+              >
+                Upload Image
+              </button>
+            </div>
           )}
         </div>
       )}
 
-      {/* Image Preview Modal */}
-      {preview && (
-        <div
-          onClick={() => setPreview(null)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.8)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-            cursor: "pointer",
-          }}
-        >
-          <img
-            src={preview}
-            alt="Preview"
-            style={{
-              maxWidth: "90%",
-              maxHeight: "90%",
-              borderRadius: "12px",
-              boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
-            }}
-          />
-        </div>
-      )}
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div style={styles.modalOverlay} onClick={() => !uploading && setShowUploadModal(false)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={styles.modalTitle}>Upload New Image</h3>
+            
+            <div style={styles.uploadArea}>
+              {uploadPreview ? (
+                <div style={styles.previewContainer}>
+                  <img src={uploadPreview} alt="Preview" style={styles.previewImage} />
+                  <button
+                    onClick={() => {
+                      setUploadFile(null);
+                      setUploadPreview(null);
+                      setUploadName("");
+                    }}
+                    style={styles.removePreview}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <label htmlFor="upload-file" style={styles.uploadLabel}>
+                  <div style={styles.uploadPlaceholder}>
+                    <span style={styles.uploadPlaceholderIcon}>📁</span>
+                    <p style={styles.uploadPlaceholderText}>Click to select image</p>
+                    <p style={styles.uploadPlaceholderSubtext}>PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                </label>
+              )}
+              <input
+                id="upload-file"
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                style={styles.hiddenInput}
+              />
+            </div>
 
-      {/* ✏️ Edit Modal */}
-      {editingImage && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1100,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "20px",
-              borderRadius: "12px",
-              width: "90%",
-              maxWidth: "400px",
-              boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
-            }}
-          >
-            <h3 style={{ marginBottom: "12px" }}>Edit Image</h3>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Image Name</label>
+              <input
+                type="text"
+                value={uploadName}
+                onChange={(e) => setUploadName(e.target.value)}
+                placeholder="Enter image name"
+                style={styles.input}
+              />
+            </div>
 
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Image name"
-              style={{
-                width: "100%",
-                padding: "8px",
-                border: "1px solid #d1d5db",
-                borderRadius: "6px",
-                marginBottom: "10px",
-              }}
-            />
-
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              style={{ marginBottom: "10px" }}
-            />
-
-            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+            <div style={styles.modalActions}>
               <button
-                onClick={() => setEditingImage(null)}
-                style={{
-                  backgroundColor: "#6b7280",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "6px 12px",
-                  cursor: "pointer",
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadFile(null);
+                  setUploadName("");
+                  setUploadPreview(null);
                 }}
+                disabled={uploading}
+                style={{...styles.modalButton, ...styles.cancelButton}}
               >
                 Cancel
               </button>
               <button
-                onClick={handleUpdate}
+                onClick={handleUpload}
+                disabled={!uploadFile || uploading}
                 style={{
-                  backgroundColor: "#2563eb",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "6px 12px",
-                  cursor: "pointer",
+                  ...styles.modalButton,
+                  ...styles.saveButton,
+                  opacity: !uploadFile || uploading ? 0.5 : 1,
+                  cursor: !uploadFile || uploading ? "not-allowed" : "pointer"
                 }}
+                onMouseEnter={(e) => uploadFile && !uploading && (e.target.style.backgroundColor = "#1d4ed8")}
+                onMouseLeave={(e) => uploadFile && !uploading && (e.target.style.backgroundColor = "#2563eb")}
               >
-                Save
+                {uploading ? "Uploading..." : "Upload"}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Image Preview Modal */}
+      {preview && (
+        <div onClick={() => setPreview(null)} style={styles.previewModal}>
+          <button onClick={() => setPreview(null)} style={styles.closePreview}>
+            ✕
+          </button>
+          <img src={preview} alt="Preview" style={styles.previewModalImage} />
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingImage && (
+        <div style={styles.modalOverlay} onClick={() => setEditingImage(null)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={styles.modalTitle}>Edit Image</h3>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Image Name</label>
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Enter image name"
+                style={styles.input}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Replace Image (Optional)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                style={styles.fileInput}
+              />
+              {newFile && (
+                <p style={styles.fileSelected}>✓ {newFile.name}</p>
+              )}
+            </div>
+
+            <div style={styles.modalActions}>
+              <button
+                onClick={() => setEditingImage(null)}
+                style={{...styles.modalButton, ...styles.cancelButton}}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                style={{...styles.modalButton, ...styles.saveButton}}
+                onMouseEnter={(e) => e.target.style.backgroundColor = "#1d4ed8"}
+                onMouseLeave={(e) => e.target.style.backgroundColor = "#2563eb"}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const styles = {
+  container: {
+    padding: "40px",
+    backgroundColor: "#f8fafc",
+    minHeight: "100vh",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "32px",
+  },
+  title: {
+    fontSize: "32px",
+    fontWeight: "700",
+    color: "#0f172a",
+    margin: "0 0 4px 0",
+  },
+  subtitle: {
+    fontSize: "14px",
+    color: "#64748b",
+    margin: 0,
+  },
+  uploadButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    backgroundColor: "#2563eb",
+    color: "white",
+    padding: "12px 24px",
+    borderRadius: "10px",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "600",
+    fontSize: "15px",
+    transition: "all 0.2s ease",
+    boxShadow: "0 4px 6px rgba(37, 99, 235, 0.2)",
+  },
+  uploadIcon: {
+    fontSize: "20px",
+    fontWeight: "300",
+  },
+  progressContainer: {
+    backgroundColor: "white",
+    padding: "16px",
+    borderRadius: "12px",
+    marginBottom: "24px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+  },
+  progressHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "8px",
+    fontSize: "14px",
+    color: "#475569",
+    fontWeight: "500",
+  },
+  progressText: {
+    color: "#2563eb",
+    fontWeight: "600",
+  },
+  progressBar: {
+    height: "8px",
+    backgroundColor: "#e2e8f0",
+    borderRadius: "999px",
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#2563eb",
+    transition: "width 0.3s ease",
+    borderRadius: "999px",
+  },
+  loadingContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "80px 20px",
+  },
+  spinner: {
+    width: "40px",
+    height: "40px",
+    border: "4px solid #e2e8f0",
+    borderTop: "4px solid #2563eb",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+  },
+  loadingText: {
+    marginTop: "16px",
+    color: "#64748b",
+    fontSize: "15px",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+    gap: "24px",
+  },
+  card: {
+    backgroundColor: "white",
+    borderRadius: "16px",
+    overflow: "hidden",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+    transition: "all 0.3s ease",
+  },
+  imageWrapper: {
+    position: "relative",
+    overflow: "hidden",
+    backgroundColor: "#f1f5f9",
+  },
+  image: {
+    width: "100%",
+    height: "200px",
+    objectFit: "cover",
+    cursor: "pointer",
+    transition: "transform 0.3s ease",
+  },
+  imageOverlay: {
+    position: "absolute",
+    inset: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0,
+    transition: "opacity 0.3s ease",
+  },
+  viewButton: {
+    backgroundColor: "white",
+    color: "#0f172a",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "8px",
+    fontWeight: "600",
+    fontSize: "14px",
+    cursor: "pointer",
+  },
+  cardContent: {
+    padding: "16px",
+  },
+  imageName: {
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#1e293b",
+    marginBottom: "12px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  buttonGroup: {
+    display: "flex",
+    gap: "8px",
+  },
+  actionButton: {
+    flex: 1,
+    padding: "8px 12px",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "600",
+    fontSize: "13px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    color: "white",
+  },
+  editButton: {
+    backgroundColor: "#10b981",
+  },
+  deleteButton: {
+    backgroundColor: "#ef4444",
+  },
+  emptyState: {
+    gridColumn: "1 / -1",
+    textAlign: "center",
+    padding: "80px 20px",
+  },
+  emptyIcon: {
+    fontSize: "64px",
+    marginBottom: "16px",
+  },
+  emptyTitle: {
+    fontSize: "20px",
+    fontWeight: "600",
+    color: "#1e293b",
+    margin: "0 0 8px 0",
+  },
+  emptyText: {
+    fontSize: "15px",
+    color: "#64748b",
+    marginBottom: "24px",
+  },
+  emptyButton: {
+    backgroundColor: "#2563eb",
+    color: "white",
+    padding: "12px 24px",
+    border: "none",
+    borderRadius: "10px",
+    fontWeight: "600",
+    fontSize: "15px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+  modalOverlay: {
+    position: "fixed",
+    inset: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+    padding: "20px",
+  },
+  modal: {
+    backgroundColor: "white",
+    padding: "32px",
+    borderRadius: "16px",
+    width: "100%",
+    maxWidth: "480px",
+    boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)",
+  },
+  modalTitle: {
+    fontSize: "24px",
+    fontWeight: "700",
+    color: "#0f172a",
+    marginBottom: "24px",
+    marginTop: 0,
+  },
+  uploadArea: {
+    marginBottom: "24px",
+  },
+  uploadLabel: {
+    display: "block",
+    cursor: "pointer",
+  },
+  uploadPlaceholder: {
+    border: "2px dashed #cbd5e1",
+    borderRadius: "12px",
+    padding: "48px 24px",
+    textAlign: "center",
+    transition: "all 0.2s ease",
+    backgroundColor: "#f8fafc",
+  },
+  uploadPlaceholderIcon: {
+    fontSize: "48px",
+    display: "block",
+    marginBottom: "12px",
+  },
+  uploadPlaceholderText: {
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#475569",
+    margin: "0 0 4px 0",
+  },
+  uploadPlaceholderSubtext: {
+    fontSize: "13px",
+    color: "#94a3b8",
+    margin: 0,
+  },
+  previewContainer: {
+    position: "relative",
+    borderRadius: "12px",
+    overflow: "hidden",
+  },
+  previewImage: {
+    width: "100%",
+    height: "240px",
+    objectFit: "cover",
+    borderRadius: "12px",
+  },
+  removePreview: {
+    position: "absolute",
+    top: "12px",
+    right: "12px",
+    backgroundColor: "rgba(0,0,0,0.6)",
+    color: "white",
+    border: "none",
+    borderRadius: "50%",
+    width: "32px",
+    height: "32px",
+    cursor: "pointer",
+    fontSize: "16px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  hiddenInput: {
+    display: "none",
+  },
+  formGroup: {
+    marginBottom: "20px",
+  },
+  label: {
+    display: "block",
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: "8px",
+  },
+  input: {
+    width: "100%",
+    padding: "12px",
+    border: "1px solid #d1d5db",
+    borderRadius: "8px",
+    fontSize: "15px",
+    boxSizing: "border-box",
+    transition: "border-color 0.2s ease",
+  },
+  fileInput: {
+    width: "100%",
+    padding: "10px",
+    border: "1px solid #d1d5db",
+    borderRadius: "8px",
+    fontSize: "14px",
+    cursor: "pointer",
+  },
+  fileSelected: {
+    marginTop: "8px",
+    fontSize: "13px",
+    color: "#10b981",
+    fontWeight: "500",
+  },
+  modalActions: {
+    display: "flex",
+    gap: "12px",
+    justifyContent: "flex-end",
+    marginTop: "32px",
+  },
+  modalButton: {
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: "8px",
+    fontWeight: "600",
+    fontSize: "14px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+  cancelButton: {
+    backgroundColor: "#f1f5f9",
+    color: "#475569",
+  },
+  saveButton: {
+    backgroundColor: "#2563eb",
+    color: "white",
+  },
+  previewModal: {
+    position: "fixed",
+    inset: 0,
+    backgroundColor: "rgba(0,0,0,0.9)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1100,
+    cursor: "pointer",
+    padding: "20px",
+  },
+  closePreview: {
+    position: "absolute",
+    top: "24px",
+    right: "24px",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    color: "white",
+    border: "none",
+    borderRadius: "50%",
+    width: "40px",
+    height: "40px",
+    fontSize: "20px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background-color 0.2s ease",
+  },
+  previewModalImage: {
+    maxWidth: "90%",
+    maxHeight: "90%",
+    borderRadius: "12px",
+    boxShadow: "0 20px 25px -5px rgba(0,0,0,0.4)",
+  },
+};
+
+// Add CSS animation for spinner
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .media-card:hover .image-overlay {
+    opacity: 1 !important;
+  }
+  
+  .media-card:hover img {
+    transform: scale(1.05);
+  }
+  
+  .upload-placeholder:hover {
+    border-color: #2563eb !important;
+    background-color: #eff6ff !important;
+  }
+  
+  input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+`;
+
+if (!document.head.querySelector('style[data-media-gallery]')) {
+  styleSheet.setAttribute('data-media-gallery', 'true');
+  document.head.appendChild(styleSheet);
+}
+
+// Add hover classes
+const CardWrapper = ({ children, ...props }) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+  
+  return (
+    <div
+      {...props}
+      className="media-card"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        ...props.style,
+        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+        boxShadow: isHovered
+          ? '0 12px 24px rgba(0,0,0,0.12)'
+          : '0 2px 8px rgba(0,0,0,0.06)',
+      }}
+    >
+      {children}
     </div>
   );
 };

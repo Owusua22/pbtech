@@ -11,6 +11,35 @@ import {
   getUserById,
   updateUserRole,
 } from "../../api";
+import { jwtDecode } from "jwt-decode";
+
+const token = localStorage.getItem("token");
+let user = null;
+let validToken = null;
+
+if (token) {
+  try {
+    const decoded = jwtDecode(token);
+    const isExpired = decoded.exp * 1000 < Date.now();
+
+    if (!isExpired) {
+      validToken = token;
+      user = JSON.parse(localStorage.getItem("user"));
+    } else {
+      // If expired, clear local storage immediately
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+  } catch (error) {
+    console.error("Invalid token:", error);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  }
+}
+
+
+
+
 
 // ---------------- Initial State ----------------
 const initialState = {
@@ -274,8 +303,33 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
+      
   },
+  
 });
+// ✅ move this OUTSIDE the createSlice (below it)
+export const startTokenExpiryWatcher = (dispatch, token) => {
+  if (!token) return;
+
+  try {
+    const decoded = jwtDecode(token);
+    const expiryTime = decoded.exp * 1000 - Date.now();
+
+    if (expiryTime > 0) {
+      setTimeout(() => {
+        dispatch(logout());
+        window.location.href = "/"; // redirect to  page
+      }, expiryTime);
+    } else {
+      dispatch(logout());
+      window.location.href = "/";
+    }
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    dispatch(logout());
+    window.location.href = "/";
+  }
+};
 
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;

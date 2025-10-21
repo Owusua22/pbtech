@@ -28,7 +28,7 @@ exports.getAppointments = async (req, res) => {
 
     const appointments = await Appointment.find(query)
       .populate("user", "name email")
-      .populate("assignedStaff", "name email");
+     
 
     res.status(200).json({ success: true, data: appointments });
   } catch (error) {
@@ -41,7 +41,7 @@ exports.getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
       .populate("user", "name email")
-      .populate("assignedStaff", "name email");
+   
 
     if (!appointment || appointment.archived) {
       return res
@@ -64,7 +64,7 @@ exports.updateAppointment = async (req, res) => {
       { new: true, runValidators: true }
     )
       .populate("user", "name email")
-      .populate("assignedStaff", "name email");
+  
 
     if (!appointment || appointment.archived) {
       return res

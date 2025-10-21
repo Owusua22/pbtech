@@ -6,13 +6,14 @@ const FooterSection = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const quickLinks = [
-    { name: "Home", href: "#" },
-    { name: "About Us", href: "#" },
-    { name: "Services", href: "#" },
-    { name: "Projects", href: "#" },
-    { name: "Contact", href: "#" }
-  ];
+const quickLinks = [
+  { name: "Home", href: "/" },
+  { name: "About Us", href: "/about" },
+  { name: "Services", href: "/services" },
+  { name: "Projects", href: "/projects" },
+  { name: "Contact", href: "/contact" },
+];
+
 
   const services = [
     "Building Construction",
@@ -110,7 +111,7 @@ const FooterSection = () => {
                 <div className="bg-white/10 p-2 rounded-lg group-hover:bg-orange-500/20 transition-colors">
                   <MapPin size={16} className="text-orange-500" />
                 </div>
-                <span className="text-blue-200 text-sm leading-relaxed">Kumasi, Ashanti Region, Ghana</span>
+                <span className="text-blue-200 text-sm leading-relaxed">Dobro-East, Nsawam</span>
               </div>
               <div className="flex items-center gap-3 group">
                 <div className="bg-white/10 p-2 rounded-lg group-hover:bg-orange-500/20 transition-colors">
@@ -124,8 +125,8 @@ const FooterSection = () => {
                 <div className="bg-white/10 p-2 rounded-lg group-hover:bg-orange-500/20 transition-colors">
                   <Mail size={16} className="text-orange-500" />
                 </div>
-                <a href="mailto:info@pbtech.com" className="text-blue-200 hover:text-white text-sm transition-colors">
-                  info@pbtech.com
+                <a href="mailto:pbtechconst@gmail.com" className="text-blue-200 hover:text-white text-sm transition-colors">
+                  pbtechconst@gmail.com
                 </a>
               </div>
               <div className="flex items-center gap-3 group">
@@ -145,11 +146,7 @@ const FooterSection = () => {
           <p className="text-blue-300 text-sm">
             © 2024 <span className="font-semibold text-white">P Btech</span>. All rights reserved.
           </p>
-          <div className="flex gap-6 text-sm text-blue-300">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <span className="text-blue-700">|</span>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-          </div>
+          
         </div>
       </div>
 

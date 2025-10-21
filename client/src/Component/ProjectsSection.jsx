@@ -28,7 +28,7 @@ const ProjectsSection = () => {
 
 
   return (
-    <section className="relative bg-gradient-to-b from-white via-blue-50/30 to-white py-10 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="relative bg-gradient-to-b from-white via-blue-50/30 to-white py-2 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background Decoration */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100 rounded-full filter blur-3xl opacity-20 -z-10" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-100 rounded-full filter blur-3xl opacity-20 -z-10" />
@@ -43,7 +43,7 @@ const ProjectsSection = () => {
             </span>
           </div>
           <h2 className="text-4xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-blue-900 mb-4">
-            Our Special Projects
+            Our Projects
           </h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
             Discover our portfolio of exceptional construction projects that showcase innovation, quality, and dedication
@@ -131,15 +131,28 @@ const ProjectsSection = () => {
 
         {/* View More Button */}
         <div className="text-center mb-20">
-          <button
-            onClick={handleViewMore}
-            className="group relative inline-flex items-center gap-3 bg-blue-900 hover:from-blue-800 hover:to-blue-600 text-white font-semibold px-10 py-5 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 overflow-hidden"
-          >
-            <span className="relative z-10">View More Projects</span>
-            <ArrowRight size={20} className="relative z-10 transform group-hover:translate-x-1 transition-transform duration-300" />
-            <div className="absolute inset-0 bg-blue-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </button>
-        </div>
+  <button
+    onClick={handleViewMore}
+    className="relative inline-flex items-center gap-2 px-10 py-4 bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 text-white font-semibold rounded-full shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 overflow-hidden group"
+  >
+    {/* Animated gradient border */}
+    <span className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-800 via-orange-500 to-blue-900 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500 animate-pulse"></span>
+
+    {/* Button text */}
+    <span className="relative z-10 text-lg tracking-wide group-hover:tracking-wider transition-all duration-300">
+      View More Projects
+    </span>
+
+    {/* Arrow icon with movement */}
+    <ArrowRight
+      size={22}
+      className="relative z-10 transform group-hover:translate-x-2 transition-transform duration-300"
+    />
+
+    {/* Overlay glow effect */}
+    <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+  </button>
+</div>
 
         
       </div>

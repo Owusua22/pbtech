@@ -2,8 +2,9 @@ import React from "react";
 import { Search, Phone, Target, Eye, Heart, Shield, Award, Users } from "lucide-react";
 import FooterSection from "../Component/FooterSection";
 import Builds from '../assets/team.jpeg';
-
+import { useNavigate } from "react-router-dom";
 const About = () => {
+  const navigate = useNavigate();
   const coreValues = [
     {
       icon: <Award className="w-8 h-8" />,
@@ -58,10 +59,14 @@ const About = () => {
                     <p className="text-blue-900 font-semibold text-sm uppercase tracking-wider mb-4">
                       Call us today
                     </p>
-                    <div className="flex items-center justify-center space-x-2 text-3xl font-bold text-blue-900">
-                      <Phone className="w-8 h-8" />
-                      <span>+233 244 245 257</span>
-                    </div>
+                    <a
+  href="tel:+233244245257"
+  className="flex items-center justify-center space-x-2 text-3xl font-bold text-blue-900 hover:text-orange-500 transition-colors duration-300 group"
+>
+  <Phone className="w-8 h-8 text-orange-500 group-hover:scale-110 transition-transform duration-300" />
+  <span className="group-hover:underline">+233 244 245 257</span>
+</a>
+
                   </div>
                 </div>
               </div>
@@ -109,9 +114,12 @@ const About = () => {
                 </p>
               </div>
 
-              <button className="mt-8 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 rounded-none transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
-              Contact Us →
-              </button>
+              <button
+      onClick={() => navigate("/contact")}
+      className="mt-8 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 rounded-none transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+    >
+      Contact Us →
+    </button>
             </div>
           </div>
         </div>

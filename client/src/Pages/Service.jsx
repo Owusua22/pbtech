@@ -2,7 +2,9 @@ import React from "react";
 import { Search, Phone, Building2, RefreshCw, ClipboardList, MessageCircle, Star, Users, Lightbulb, ThumbsUp, Mail, MapPin } from "lucide-react";
 import Project from '../assets/escavator.jpeg';
 import FooterSection from "../Component/FooterSection";
+import { useNavigate } from "react-router-dom";
 const Services = () => {
+  const navigate = useNavigate();
   const services = [
     {
       icon: <Building2 className="w-12 h-12" />,
@@ -78,30 +80,45 @@ const Services = () => {
             </div>
 
             {/* Right Content - Contact Card */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="bg-white shadow-2xl p-8 max-w-sm w-full">
-                <div className="border-t-4 border-orange-500 pt-6">
-                  <div className="text-center space-y-4">
-                    <p className="text-blue-900 font-semibold text-sm uppercase tracking-wider">
-                      Get a Quote Today
-                    </p>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-center space-x-2 text-lg text-blue-900">
-                        <Phone className="w-5 h-5" />
-                        <span>+233 123 456 789</span>
-                      </div>
-                      <div className="flex items-center justify-center space-x-2 text-lg text-blue-900">
-                        <Mail className="w-5 h-5" />
-                        <span>info@pbtech.com</span>
-                      </div>
-                    </div>
-                    <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 transition-colors duration-300">
-                      Contact Us
-                    </button>
-                  </div>
-                </div>
-              </div>
+       <div className="flex justify-center lg:justify-end">
+      <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-sm w-full transition-transform duration-300 hover:-translate-y-1">
+        <div className="border-t-4 border-orange-500 pt-6">
+          <div className="text-center space-y-5">
+            <p className="text-blue-900 font-semibold text-sm uppercase tracking-wider">
+              Get a Quote Today
+            </p>
+
+            <div className="space-y-3">
+              {/* Phone (click to call) */}
+              <a
+                href="tel:+233244245257"
+                className="flex items-center justify-center space-x-2 text-lg text-blue-900 hover:text-orange-500 transition-colors duration-300 group"
+              >
+                <Phone className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform duration-300" />
+                <span className="group-hover:underline">+233 244 245 257</span>
+              </a>
+
+              {/* Email (click to open mail app) */}
+              <a
+                href="mailto:pbtechconst@gmail.com"
+                className="flex items-center justify-center space-x-2 text-lg text-blue-900 hover:text-orange-500 transition-colors duration-300 group"
+              >
+                <Mail className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform duration-300" />
+                <span className="group-hover:underline">pbtechconst@gmail.com</span>
+              </a>
             </div>
+
+            {/* Contact Us button (navigates to /contact) */}
+            <button
+              onClick={() => navigate("/contact")}
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
+            >
+              Contact Us
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
           </div>
         </div>
       </section>
@@ -218,14 +235,23 @@ const Services = () => {
           <p className="text-xl text-blue-200 mb-8 max-w-2xl mx-auto">
             Contact us today for a free consultation and let's discuss how we can bring your construction vision to life.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-4 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
-              Get Free Quote →
-            </button>
-            <button className="border-2 border-white text-white hover:bg-white hover:text-blue-900 font-semibold px-8 py-4 transition-all duration-300">
-              View Portfolio
-            </button>
-          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
+      {/* ✅ Get Free Quote Button - Navigates to /contact */}
+      <button
+        onClick={() => navigate("/contact")}
+        className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-8 py-4 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+      >
+        Get Free Quote →
+      </button>
+
+      {/* ✅ View Portfolio Button - Navigates to /projects */}
+      <button
+        onClick={() => navigate("/projects")}
+        className="border-2 border-white text-white hover:bg-white hover:text-blue-900 font-semibold px-8 py-4 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+      >
+        View Portfolio
+      </button>
+    </div>
         </div>
       </section>
         <FooterSection/>

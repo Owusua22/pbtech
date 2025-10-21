@@ -7,15 +7,8 @@ const appointmentSchema = new mongoose.Schema(
       ref: "User", // link to the client/user who books
         required: true,
     },
-   
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    description: {
-      type: String,
-    },
+
+  
     date: {
       type: Date,
       required: true,
@@ -29,6 +22,11 @@ const appointmentSchema = new mongoose.Schema(
       enum: ["Pending", "Confirmed", "Cancelled", "Completed"],
       default: "Pending",
     },
+    contactNumber: {
+      type: String,
+      required: true,
+    },
+   
     location: {
       address: String,
       city: String,
@@ -38,12 +36,7 @@ const appointmentSchema = new mongoose.Schema(
         lng: Number,
       },
     },
-    assignedStaff: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User", // link to staff user model
-      },
-    ],
+  
 
     notes: [
       {
@@ -55,6 +48,12 @@ const appointmentSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    mode:
+    {
+      type: String,
+      enum: ["In-Person", "Virtual"],
+      default: "In-Person",
+    },
     archived: {
       type: Boolean,
       default: false, // true if appointment is archived
