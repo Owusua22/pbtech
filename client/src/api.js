@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Use environment variable (fallback to localhost for dev)
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://backend-b4ae.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
