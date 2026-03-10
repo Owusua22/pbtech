@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Use environment variable (fallback to localhost for dev)
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "http://localhost:6000/api",
   headers: {
     "Content-Type": "application/json",
   },
