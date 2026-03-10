@@ -29,6 +29,8 @@ import Task from "./Pages/Admin/Task";
 import Dashboard from "./Pages/Admin/Dashboard";
 import AppointmentsPage from "./Pages/Admin/Appointments";
 import Media from "./Pages/Admin/Media";
+import AdminRegister from "./Pages/Admin/AdminRegistration";
+import AdminLogin from "./Pages/Admin/AdminLogin";
 
 /* ✅ Auto Scroll to Top on Route Change */
 function ScrollToTop() {
@@ -95,6 +97,9 @@ function AppContent() {
           <Route path="/services" element={<Service />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/admin/register" element={<AdminRegister />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+
 
           {/* ✅ Protected Admin routes */}
           <Route path="/admin" element={<ProtectedAdminRoute />}>

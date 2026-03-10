@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Use environment variable (fallback to localhost for dev)
 const API = axios.create({
-  baseURL: "https://backend-b4ae.onrender.com/api",
+  baseURL: "http://localhost:5000/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -20,19 +20,31 @@ API.interceptors.request.use((req) => {
 // ---------- AUTH ----------
 
 // Public routes
+// ---------- AUTH ----------
+
+// Public user routes
 export const registerUser = (userData) => API.post("/auth/register", userData);
 export const loginUser = (credentials) => API.post("/auth/login", credentials);
+
+// Admin authentication
+export const registerAdmin = (adminData) =>
+  API.post("/auth/admin/register", adminData);
+
+export const loginAdmin = (credentials) =>
+  API.post("/auth/admin/login", credentials);
 
 // Protected user routes
 export const getProfile = () => API.get("/auth/me");
 export const updateProfile = (updatedData) => API.put("/auth/me", updatedData);
 export const deleteProfile = () => API.delete("/auth/me");
+
 export const changePassword = (passwords) =>
   API.put("/auth/me/change-password", passwords);
 
-// Admin routes
+// Admin management routes
 export const getAllUsers = () => API.get("/auth");
 export const getUserById = (id) => API.get(`/auth/${id}`);
+
 export const updateUserRole = (id, role) =>
   API.put(`/auth/${id}/role`, { role });
 
